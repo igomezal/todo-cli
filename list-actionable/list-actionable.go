@@ -101,6 +101,7 @@ func NewTodoTable(todos []db.Todo) Model {
 	columns := []table.Column{
 		{Title: "ID", Width: 4},
 		{Title: "Todo", Width: 25},
+		{Title: "Tag", Width: 16},
 		{Title: "State", Width: 8},
 		{Title: "Creation date", Width: 17},
 	}
@@ -111,6 +112,7 @@ func NewTodoTable(todos []db.Todo) Model {
 		item := []string{
 			strconv.Itoa(todo.ID),
 			todo.Todo,
+			todo.Tag,
 			todo.State.String(),
 			todo.DateCreated.Format("2006-01-02"),
 		}

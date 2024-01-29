@@ -14,7 +14,7 @@ ToDo CLI
 - [X] You can delete the ToDos
     - [X] Interactive delete the ToDos
 - [X] You can filter the ToDos
-- [ ] You can add tags to ToDos
+- [X] You can add tags to ToDos
 
 ## How can you interact with the ToDos?
 
@@ -44,5 +44,5 @@ ToDo CLI
 - [x] File creation inside user directory
 - [X] Models to manage data
 - [x] SQL queries to interact with the database
-- [ ] CLI
+- [X] CLI
 

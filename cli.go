@@ -28,6 +28,12 @@ var addCmd = &cobra.Command{
 		todoDB, err := db.NewTodoDB()
 		defer todoDB.Close()
 
+		tag, err := cmd.Flags().GetString("tag")
+
+		if err != nil {
+			return errors.New("Not valid tag")
+		}
+
 		if len(args) == 0 {
 			p := tea.NewProgram(add.AddInputModel())
 			m, err := p.Run()
@@ -36,7 +42,7 @@ var addCmd = &cobra.Command{
 					return errors.New("Cannot add empty task")
 				}
 
-				err = todoDB.CreateTodo(task.Value, "")
+				err = todoDB.CreateTodo(task.Value, tag)
 
 				if err != nil {
 					return err
@@ -57,7 +63,7 @@ var addCmd = &cobra.Command{
 			return errors.New("Cannot add empty task")
 		}
 
-		err = todoDB.CreateTodo(task, "")
+		err = todoDB.CreateTodo(task, tag)
 
 		if err != nil {
 			return err
@@ -89,15 +95,21 @@ var listCmd = &cobra.Command{
 			return errors.New("Not valid date")
 		}
 
+		tag, err := cmd.Flags().GetString("tag")
+
+		if err != nil {
+			return errors.New("Not valid tag")
+		}
+
 		var todos []db.Todo
 
 		if dateString == "" {
-			todos, err = todoDB.GetFilteredTasksByState(db.Pending)
+			todos, err = todoDB.GetFilteredTasksByState(db.Pending, tag)
 		} else {
 			if dateString == "today" {
-				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Pending, time.Now())
+				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Pending, time.Now(), tag)
 			} else if dateString == "yesterday" {
-				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Pending, time.Now().Add(-24*time.Hour))
+				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Pending, time.Now().Add(-24*time.Hour), tag)
 			} else {
 				date, err := time.Parse("2006-01-02", dateString)
 
@@ -105,7 +117,7 @@ var listCmd = &cobra.Command{
 					return errors.New("Not valid date")
 				}
 
-				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Pending, date)
+				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Pending, date, tag)
 			}
 		}
 
@@ -143,15 +155,21 @@ var listAllCmd = &cobra.Command{
 			return errors.New("Not valid date")
 		}
 
+		tag, err := cmd.Flags().GetString("tag")
+
+		if err != nil {
+			return errors.New("Not valid tag")
+		}
+
 		var todos []db.Todo
 
 		if dateString == "" {
-			todos, err = todoDB.GetTasks()
+			todos, err = todoDB.GetTasks(tag)
 		} else {
 			if dateString == "today" {
-				todos, err = todoDB.GetFilteredTasksByCreationDate(time.Now())
+				todos, err = todoDB.GetFilteredTasksByCreationDate(time.Now(), tag)
 			} else if dateString == "yesterday" {
-				todos, err = todoDB.GetFilteredTasksByCreationDate(time.Now().Add(-24 * time.Hour))
+				todos, err = todoDB.GetFilteredTasksByCreationDate(time.Now().Add(-24*time.Hour), tag)
 			} else {
 				date, err := time.Parse("2006-01-02", dateString)
 
@@ -159,7 +177,7 @@ var listAllCmd = &cobra.Command{
 					return errors.New("Not valid date")
 				}
 
-				todos, err = todoDB.GetFilteredTasksByCreationDate(date)
+				todos, err = todoDB.GetFilteredTasksByCreationDate(date, tag)
 			}
 		}
 
@@ -197,15 +215,21 @@ var listDoneTasksCmd = &cobra.Command{
 			return errors.New("Not valid date")
 		}
 
+		tag, err := cmd.Flags().GetString("tag")
+
+		if err != nil {
+			return errors.New("Not valid tag")
+		}
+
 		var todos []db.Todo
 
 		if dateString == "" {
-			todos, err = todoDB.GetFilteredTasksByState(db.Done)
+			todos, err = todoDB.GetFilteredTasksByState(db.Done, tag)
 		} else {
 			if dateString == "today" {
-				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Done, time.Now())
+				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Done, time.Now(), tag)
 			} else if dateString == "yesterday" {
-				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Done, time.Now().Add(-24*time.Hour))
+				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Done, time.Now().Add(-24*time.Hour), tag)
 			} else {
 				date, err := time.Parse("2006-01-02", dateString)
 
@@ -213,7 +237,7 @@ var listDoneTasksCmd = &cobra.Command{
 					return errors.New("Not valid date")
 				}
 
-				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Done, date)
+				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Done, date, tag)
 			}
 		}
 
@@ -251,15 +275,21 @@ var listPendingTasksCmd = &cobra.Command{
 			return errors.New("Not valid date")
 		}
 
+		tag, err := cmd.Flags().GetString("tag")
+
+		if err != nil {
+			return errors.New("Not valid tag")
+		}
+
 		var todos []db.Todo
 
 		if dateString == "" {
-			todos, err = todoDB.GetFilteredTasksByState(db.Pending)
+			todos, err = todoDB.GetFilteredTasksByState(db.Pending, tag)
 		} else {
 			if dateString == "today" {
-				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Pending, time.Now())
+				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Pending, time.Now(), tag)
 			} else if dateString == "yesterday" {
-				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Pending, time.Now().Add(-24*time.Hour))
+				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Pending, time.Now().Add(-24*time.Hour), tag)
 			} else {
 				date, err := time.Parse("2006-01-02", dateString)
 
@@ -267,7 +297,7 @@ var listPendingTasksCmd = &cobra.Command{
 					return errors.New("Not valid date")
 				}
 
-				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Pending, date)
+				todos, err = todoDB.GetFilteredTasksByStateAndDate(db.Pending, date, tag)
 			}
 		}
 
@@ -301,7 +331,7 @@ var markAsDoneCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			todos, err := todoDB.GetFilteredTasksByState(db.Pending)
+			todos, err := todoDB.GetFilteredTasksByState(db.Pending, "")
 
 			if err != nil {
 				return nil
@@ -366,7 +396,7 @@ var markAsNotDoneCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			todos, err := todoDB.GetFilteredTasksByState(db.Done)
+			todos, err := todoDB.GetFilteredTasksByState(db.Done, "")
 
 			if err != nil {
 				return err
@@ -431,7 +461,7 @@ var deleteTodoCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			todos, err := todoDB.GetTasks()
+			todos, err := todoDB.GetTasks("")
 
 			if err != nil {
 				return err
@@ -490,6 +520,20 @@ func init() {
 		"d",
 		"",
 		"date with format YYYY-MM-DD used to filter by the creation date, some special dates are available: today and yesterday",
+	)
+
+	listCmd.PersistentFlags().StringP(
+		"tag",
+		"t",
+		"",
+		"tag used as identifier of your todos",
+	)
+
+	addCmd.PersistentFlags().StringP(
+		"tag",
+		"t",
+		"",
+		"tag used as identifier of your todos",
 	)
 
 	rootCmd.AddCommand(addCmd)

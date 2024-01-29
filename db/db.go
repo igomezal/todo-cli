@@ -31,6 +31,7 @@ type Todo struct {
 	State         status
 	DateCreated   time.Time // Probar si funciona bien el time.Time
 	DateCompleted sql.NullTime
+	Tag           string
 }
 
 type todoDB struct {
@@ -77,6 +78,7 @@ func (t *todoDB) setupTodoSchema() error {
 			id               INTEGER PRIMARY KEY AUTOINCREMENT,
 			todo             VARCHAR(255) NOT NULL,
 			state            INTEGER NOT NULL,
+			tag              VARCHAR(255),
 			date_created     DATETIME NOT NULL,
 			date_completed   DATETIME
 		);
@@ -109,6 +111,7 @@ func getTodosHelper(functionName string, db *sql.DB, predicate string, filters .
 			&todo.ID,
 			&todo.Todo,
 			&todo.State,
+			&todo.Tag,
 			&todo.DateCreated,
 			&todo.DateCompleted,
 		)
@@ -126,29 +129,41 @@ func getTodosHelper(functionName string, db *sql.DB, predicate string, filters .
 	return todos, nil
 }
 
-func (t *todoDB) GetTasks() ([]Todo, error) {
+func (t *todoDB) GetTasks(tag string) ([]Todo, error) {
+	if tag != "" {
+		return getTodosHelper("GetTasks", t.db, "SELECT * FROM todos WHERE tag = ?", tag)
+	}
 	return getTodosHelper("GetTasks", t.db, "SELECT * FROM todos")
 }
 
-func (t *todoDB) GetFilteredTasksByState(state status) ([]Todo, error) {
+func (t *todoDB) GetFilteredTasksByState(state status, tag string) ([]Todo, error) {
+	if tag != "" {
+		return getTodosHelper("GetFilteredTasksByState", t.db, "SELECT * FROM todos WHERE state = ? AND tag = ?", state, tag)
+	}
 	return getTodosHelper("GetFilteredTasksByState", t.db, "SELECT * FROM todos WHERE state = ?", state)
 }
 
-func (t *todoDB) GetFilteredTasksByCreationDate(time time.Time) ([]Todo, error) {
+func (t *todoDB) GetFilteredTasksByCreationDate(time time.Time, tag string) ([]Todo, error) {
+	if tag != "" {
+		return getTodosHelper("GetFilteredTasksByCreationDate", t.db, "SELECT * FROM todos WHERE date(date_created) = date(?) AND tag = ?", time, tag)
+	}
 	return getTodosHelper("GetFilteredTasksByCreationDate", t.db, "SELECT * FROM todos WHERE date(date_created) = date(?)", time)
 }
 
-func (t *todoDB) GetFilteredTasksByStateAndDate(state status, time time.Time) ([]Todo, error) {
+func (t *todoDB) GetFilteredTasksByStateAndDate(state status, time time.Time, tag string) ([]Todo, error) {
+	if tag != "" {
+		return getTodosHelper("GetFilteredTasksByState", t.db, "SELECT * FROM todos WHERE state = ? AND date(date_created) = date(?) AND tag = ?", state, time, tag)
+	}
 	return getTodosHelper("GetFilteredTasksByState", t.db, "SELECT * FROM todos WHERE state = ? AND date(date_created) = date(?)", state, time)
 }
 
-func (t *todoDB) CreateTodo(title string, tags string) error {
+func (t *todoDB) CreateTodo(title string, tag string) error {
 	_, err := t.db.Exec(`
 		INSERT INTO todos
-			(todo, state, date_created)
+			(todo, state, tag, date_created)
 		VALUES
-			(?,?,?)
-	`, title, Pending, time.Now())
+			(?,?,?,?)
+	`, title, Pending, tag, time.Now())
 
 	return err
 }
